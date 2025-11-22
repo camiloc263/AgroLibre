@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vaca Holstein - AgroLibre</title>
+    <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+
+    <header>
+        <a href="index.html" class="logo">AgroLibre</a>
+        <div>Mis Compras</div>
+    </header>
+
+    <div class="contenedor-detalle">
+        
+        <div class="columna-fotos">
+            <img src="https://via.placeholder.com/600x400?text=Foto+Principal+Vaca" class="foto-principal" alt="Vaca">
+            <h3>Descripción</h3>
+            <p>Vaca de 3 años con excelente genética lechera. Todas las vacunas al día.</p>
+            
+            <table class="tabla-caracteristicas">
+                <tr><td><strong>Raza</strong></td><td>Holstein</td></tr>
+                <tr><td><strong>Edad</strong></td><td>36 Meses</td></tr>
+            </table>
+        </div>
+
+        <div class="columna-info">
+            <div style="font-size:14px; color:#666;">Nuevo | 45 visualizaciones</div>
+            <h1>Vaca Holstein Lechera</h1>
+            <div class="precio-gigante">$ 3.500.000</div>
+
+            <button class="btn-comprar" onclick="alert('¡Gracias por tu compra!')">Comprar ahora</button>
+
+            <div class="caja-vendedor">
+                <div style="font-weight:bold; margin-bottom:10px;">Información del Vendedor</div>
+                
+                <div class="info-vendedor-item">
+                    <span class="icono">👤</span> Juan Pérez Ganadero
+                </div>
+                <div class="info-vendedor-item">
+                    <span class="icono">📍</span> San Pedro, Antioquia
+                </div>
+
+                <button class="btn-whatsapp" onclick="contactarPorWhatsapp('Vaca Holstein')">
+                    Contactar por WhatsApp
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="js/main.js"></script>
+</body>
+</html>
