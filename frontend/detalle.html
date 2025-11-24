@@ -3,49 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vaca Holstein - AgroLibre</title>
+    <title>Detalle del Producto - MercaAgro</title>
+    
     <link rel="stylesheet" href="css/estilos.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
 </head>
 <body>
 
-    <header>
-        <a href="index.html" class="logo">AgroLibre</a>
-        <div>Mis Compras</div>
+    <header class="header-principal">
+        <div class="container-flex">
+            <a href="index.html" class="logo-container">
+                <div class="logo-icono">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 13-1.8 16.2"></path><path d="M12 10a7 7 0 0 1 0 10Z"></path></svg>
+                </div>
+                <div class="logo-texto">Merca<span class="agro-destacado">Agro</span></div>
+            </a>
+            
+            <div class="buscador-container">
+                <input type="text" class="buscador-input" placeholder="Buscar...">
+                <button class="buscador-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                </button>
+            </div>
+
+            <div class="usuario-acciones">
+                <a href="index.html" class="btn-accion">
+                    <span>Volver al Inicio</span>
+                </a>
+            </div>
+        </div>
     </header>
 
-    <div class="contenedor-detalle">
+    <nav class="barra-navegacion">
+        <div class="contenedor-nav">
+            <ul class="menu-principal">
+                <li class="item-menu"><a href="index.html">Inicio</a></li>
+                <li class="item-menu"><a href="#">Categorías</a></li>
+                <li class="item-menu"><a href="#">Ofertas</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="contenedor-detalle" style="margin-top: 40px;">
         
         <div class="columna-fotos">
-            <img src="https://via.placeholder.com/600x400?text=Foto+Principal+Vaca" class="foto-principal" alt="Vaca">
-            <h3>Descripción</h3>
-            <p>Vaca de 3 años con excelente genética lechera. Todas las vacunas al día.</p>
+            <img src="" id="detalle-imagen" class="foto-principal" alt="Cargando imagen...">
+            
+            <h3>Descripción detallada</h3>
+            <p id="detalle-descripcion" style="line-height: 1.6; color: #555;">
+                Cargando información del producto...
+            </p>
             
             <table class="tabla-caracteristicas">
-                <tr><td><strong>Raza</strong></td><td>Holstein</td></tr>
-                <tr><td><strong>Edad</strong></td><td>36 Meses</td></tr>
+                <tr>
+                    <td class="label-tec">Stock disponible</td>
+                    <td id="detalle-stock">...</td>
+                </tr>
+                <tr>
+                    <td class="label-tec">Código publicación</td>
+                    <td id="detalle-id">...</td>
+                </tr>
             </table>
         </div>
 
         <div class="columna-info">
-            <div style="font-size:14px; color:#666;">Nuevo | 45 visualizaciones</div>
-            <h1>Vaca Holstein Lechera</h1>
-            <div class="precio-gigante">$ 3.500.000</div>
+            <div style="font-size:14px; color:#666; margin-bottom: 10px;">Nuevo | Disponible</div>
+            
+            <h1 id="detalle-titulo" style="font-family: 'Montserrat', sans-serif; margin-bottom: 15px;">
+                Cargando nombre...
+            </h1>
+            
+            <div class="precio-gigante" id="detalle-precio" style="color: var(--color-primario); font-weight: bold;">
+                $ ...
+            </div>
 
-            <button class="btn-comprar" onclick="alert('¡Gracias por tu compra!')">Comprar ahora</button>
+            <button class="btn-comprar">Comprar ahora</button>
 
             <div class="caja-vendedor">
-                <div style="font-weight:bold; margin-bottom:10px;">Información del Vendedor</div>
+                <div style="font-weight:bold; margin-bottom:15px; border-bottom:1px solid #eee; padding-bottom:5px;">
+                    Información del Vendedor
+                </div>
                 
                 <div class="info-vendedor-item">
-                    <span class="icono">👤</span> Juan Pérez Ganadero
+                    <span class="icono">👤</span>
+                    <span id="detalle-vendedor">Cargando vendedor...</span>
                 </div>
+                
                 <div class="info-vendedor-item">
-                    <span class="icono">📍</span> San Pedro, Antioquia
+                    <span class="icono">📍</span>
+                    <span id="detalle-ubicacion">...</span>
                 </div>
 
-                <button class="btn-whatsapp" onclick="contactarPorWhatsapp('Vaca Holstein')">
-                    Contactar por WhatsApp
-                </button>
+                <div style="margin-top: 20px;">
+                    <button class="btn-whatsapp" id="btn-whatsapp-detalle">
+                        <span style="margin-right: 5px;">💬</span> Contactar por WhatsApp
+                    </button>
+                </div>
             </div>
         </div>
 

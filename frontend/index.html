@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MercaAgro - Tu tienda de campo</title>
-    
     <link rel="stylesheet" href="css/index.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
 </head>
@@ -12,63 +11,69 @@
 
     <header class="header-principal">
         <div class="container-flex">
-           <a href="index.html" class="logo-container">
-    <div class="logo-icono" id="logo-icono-db">
-        </div>
-    <div class="logo-texto" id="logo-texto-db">
-        Cargando...
-    </div>
-</a>
+            <a href="index.html" class="logo-container">
+                <div class="logo-icono" id="logo-icono-db"></div>
+                <div class="logo-texto" id="logo-texto-db">Cargando...</div>
+            </a>
             
             <div class="buscador-container">
                 <input type="text" class="buscador-input" placeholder="Buscar vacas, alimentos, herramientas...">
-                <button class="buscador-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                    </svg>
-                </button>
+                <button class="buscador-btn">🔍</button>
             </div>
 
-           <div class="usuario-acciones" id="contenedor-usuario">
-    </div>
+            <div class="usuario-acciones" id="contenedor-usuario">
+                </div>
         </div>
     </header>
     
     <nav class="barra-navegacion">
-       <div class="contenedor-nav">
-        <ul class="menu-principal" id="contenedor-menu">
-           <li class="item-menu categorias-btn">
-    <a href="#">
-        <span class="icono-hamburguesa">☰</span> Todas las Categorías
-    </a>
-    
-    <ul class="submenu" id="dropdown-todas">
-        </ul>
-</li>
-            
-            </ul>
-    </div>
+        <div class="contenedor-nav">
+            <ul class="menu-principal" id="contenedor-menu">
+                <li class="item-menu categorias-btn">
+                    <a href="#">☰ Todas las Categorías</a>
+                    <ul class="submenu" id="dropdown-todas"></ul>
+                </li>
+                </ul>
+        </div>
     </nav>
     
     <div class="zona-hero">
-        
-        <div class="slider-container" id="contenedor-slider">
-            </div>
+        <div class="slider-container" id="contenedor-slider"></div>
 
         <div class="contenedor-limitado">
             <div class="panel-informacion" id="contenedor-beneficios">
                 </div>
         </div>
-
     </div>
-
-    <div class="contenedor-principal">
-        <h2 class="titulo-seccion">✨ Inspirado en lo último que viste</h2>
-        
-        <div class="grilla-animales" id="contenedor-productos">
+    
+ <div class="contenedor-categorias-visuales">
+    <h3 class="titulo-categorias">Explora por categoría</h3>
+    <div class="slider-categorias" id="contenedor-categorias-visuales">
+        </div>
+</div>
+    
+    <div class="contenedor-principal" id="contenedor-dinamico">
+        <p style="text-align:center; padding: 20px;">Cargando catálogo...</p>
+    </div>
+  <footer class="footer-principal">
+        <div class="contenedor-footer">
+            
+            <div class="seccion-footer">
+                <h4>Productos más buscados</h4>
+                <div class="lista-tags" id="footer-busquedas">
+                    </div>
             </div>
-    </div>
+
+            <div class="seccion-legal">
+                <div class="links-legales" id="footer-legales">
+                    </div>
+                <p class="copyright-texto">
+                    Copyright © 1999-2025 AgroLibre Colombia LTDA.
+                </p>
+            </div>
+
+        </div>
+    </footer>
 
     <script src="js/main.js"></script>
 </body>

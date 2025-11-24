@@ -1,82 +1,102 @@
 // frontend/js/main.js
 
-document.addEventListener('DOMContentLoaded', () =>{ 
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("🚀 Iniciando aplicación...");
+
+    // Cargas Generales
+    cargarConfiguracion();
+    cargarMenuUsuario();
+    cargarCategorias();
+    cargarSliderDB();
+    cargarBeneficios();
+    cargarCategoriasVisuales();
+    cargarFooter(); // <--- No olvides esta si ya la tienes
+
+    // Carga inteligente según la página
+    if (document.getElementById('contenedor-dinamico')) {
+        cargarHomeDinamico();
+    }
     
-    // =========================================================
-    // 1. LÓGICA DEL SLIDER (Solo si existe en la página)
-    // =========================================================
-    let indiceSlide = 1;
-    if (document.querySelectorAll('.slide').length > 0) {
-        mostrarSlides(indiceSlide);
-        
-        // Auto-play del slider
-        setInterval(() => {
-            if(typeof window.moverSlide === 'function') window.moverSlide(1);
-        }, 5000);
-    }
-
-    // Definir funciones globales del slider para el HTML
-    window.moverSlide = function(n) { mostrarSlides(indiceSlide += n); }
-    window.slideActual = function(n) { mostrarSlides(indiceSlide = n); }
-
-    function mostrarSlides(n) {
-        let slides = document.getElementsByClassName("slide");
-        let dots = document.getElementsByClassName("dot");
-        if (slides.length === 0) return;
-
-        if (n > slides.length) {indiceSlide = 1}    
-        if (n < 1) {indiceSlide = slides.length}
-        
-        for (let i = 0; i < slides.length; i++) { slides[i].style.display = "none"; }
-        for (let i = 0; i < dots.length; i++) { dots[i].className = dots[i].className.replace(" active", ""); }
-        
-        slides[indiceSlide-1].style.display = "block";
-        
-        // Reiniciar animación texto
-        let contenido = slides[indiceSlide-1].querySelector('.contenido-slide');
-        if(contenido) {
-            contenido.style.animation = 'none';
-            contenido.offsetHeight; 
-            contenido.style.animation = 'subirTexto 1s ease forwards';
-        }
-        if(dots.length > 0) dots[indiceSlide-1].className += " active";
-    }
-
-    // =========================================================
-    // 2. ENRUTADOR: QUÉ CARGAR SEGÚN LA PÁGINA
-    // =========================================================
-    
-    // Si estamos en el Home (hay contenedor de productos), cargamos todo
-    if (document.getElementById('contenedor-productos')) {
-        if (document.getElementById('contenedor-slider')) cargarSliderDB();
-        cargarProductos(); // <--- Aquí llamamos a la función que faltaba
-        cargarBeneficios();
-    }
-
-    if (document.getElementById('contenedor-menu')) {
-        cargarCategorias(); // <--- NUEVA LÍNEA
-    }
-
-    // Si estamos en Detalle (hay título de detalle), cargamos la info del animal
     if (document.getElementById('detalle-titulo')) {
         cargarDetalleProducto();
     }
-
-    cargarConfiguracion();
-    cargarMenuUsuario();
 });
 
-// =========================================================
-// 3. FUNCIONES DE CONEXIÓN (API)
-// =========================================================
+// ---------------------------------------------------------
+// 1. LOGO Y CONFIGURACIÓN
+// ---------------------------------------------------------
+async function cargarConfiguracion() {
+    try {
+        const icono = document.getElementById('logo-icono-db');
+        const texto = document.getElementById('logo-texto-db');
+        if (!icono || !texto) return;
 
-// A. CARGAR SLIDER DESDE BD
+        const res = await fetch('http://localhost:3000/api/configuracion');
+        const data = await res.json();
+
+        icono.innerHTML = data.logo_svg || '';
+        const nombre = data.nombre_sitio || 'MercaAgro';
+        const mitad = Math.ceil(nombre.length / 2);
+        texto.innerHTML = `${nombre.slice(0, mitad)}<span class="agro-destacado">${nombre.slice(mitad)}</span>`;
+    } catch (error) { console.error("❌ Error Config:", error); }
+}
+
+// ---------------------------------------------------------
+// 2. MENÚ USUARIO
+// ---------------------------------------------------------
+async function cargarMenuUsuario() {
+    try {
+        const contenedor = document.getElementById('contenedor-usuario');
+        if (!contenedor) return;
+        const res = await fetch('http://localhost:3000/api/menu-usuario');
+        const data = await res.json();
+        contenedor.innerHTML = '';
+        data.forEach(btn => {
+            contenedor.innerHTML += `
+                <a href="${btn.enlace}" class="btn-accion">
+                    <div class="icono-accion">${btn.icono_svg}</div>
+                    <span>${btn.texto}</span>
+                </a>`;
+        });
+    } catch (error) { console.error("❌ Error Usuario:", error); }
+}
+
+// ---------------------------------------------------------
+// 3. CATEGORÍAS (Menú y Dropdown)
+// ---------------------------------------------------------
+async function cargarCategorias() {
+    try {
+        const menu = document.getElementById('contenedor-menu');
+        const dropdown = document.getElementById('dropdown-todas');
+        if (!menu) return;
+
+        const res = await fetch('http://localhost:3000/api/categorias');
+        const data = await res.json();
+
+        let htmlDropdown = '';
+        data.forEach(cat => { htmlDropdown += `<li><a href="#">${cat.nombre}</a></li>`; });
+        if (dropdown) dropdown.innerHTML = htmlDropdown;
+
+        // Opcional: Agregar al menú horizontal
+        data.forEach(cat => {
+             // menu.innerHTML += `<li class="item-menu"><a href="#">${cat.nombre}</a></li>`;
+        });
+        menu.innerHTML += `<li class="item-menu destaque"><a href="#">Ofertas</a></li>`;
+
+    } catch (error) { console.error("❌ Error Categorías:", error); }
+}
+
+// ---------------------------------------------------------
+// 4. SLIDER PRINCIPAL
+// ---------------------------------------------------------
+let indiceSlide = 1;
 async function cargarSliderDB() {
     try {
         const contenedor = document.getElementById('contenedor-slider');
-        const respuesta = await fetch('http://localhost:3000/api/banners');
-        const banners = await respuesta.json();
+        if (!contenedor) return;
 
+        const res = await fetch('http://localhost:3000/api/banners');
+        const banners = await res.json();
         if (banners.length === 0) return;
 
         let htmlSlides = '';
@@ -85,7 +105,7 @@ async function cargarSliderDB() {
         banners.forEach((banner, index) => {
             htmlSlides += `
                 <div class="slide fade">
-                    <img src="${banner.url_imagen}" class="imagen-banner" alt="${banner.titulo}">
+                    <img src="${banner.url_imagen}" class="imagen-banner">
                     <div class="overlay-gradiente"></div>
                     <div class="contenido-slide">
                         <span class="etiqueta-destacado">DESTACADO</span>
@@ -98,308 +118,226 @@ async function cargarSliderDB() {
         });
         htmlDots += '</div>';
         
-        contenedor.innerHTML = htmlSlides + `
-            <a class="prev" onclick="window.moverSlide(-1)">❮</a>
-            <a class="next" onclick="window.moverSlide(1)">❯</a>
-        ` + htmlDots;
+        contenedor.innerHTML = htmlSlides + 
+            `<a class="prev" onclick="window.moverSlide(-1)">❮</a>` +
+            `<a class="next" onclick="window.moverSlide(1)">❯</a>` + 
+            htmlDots;
 
-        // Reiniciamos lógica visual del slider
-        if(typeof window.moverSlide === 'function') window.moverSlide(0);
+        mostrarSlides(indiceSlide);
+        setInterval(() => { window.moverSlide(1); }, 5000);
 
-    } catch (error) { console.error("Error slider:", error); }
+    } catch (error) { console.error("❌ Error Slider:", error); }
 }
 
-// B. CARGAR PRODUCTOS (HOME) --> ¡AQUÍ ESTÁ LA FUNCIÓN QUE FALTABA!
-async function cargarProductos() {
-    try {
-        const contenedor = document.getElementById('contenedor-productos');
-        if (!contenedor) return;
+window.moverSlide = (n) => mostrarSlides(indiceSlide += n);
+window.slideActual = (n) => mostrarSlides(indiceSlide = n);
 
-        const respuesta = await fetch('http://localhost:3000/api/productos');
-        const productos = await respuesta.json();
-
-        contenedor.innerHTML = ''; // Limpiar
-
-        if (productos.length === 0) {
-            contenedor.innerHTML = '<p style="width:100%; text-align:center;">No hay animales publicados aún.</p>';
-            return;
-        }
-
-        productos.forEach(animal => {
-            const imagenUrl = animal.url_imagen || 'https://placehold.co/400x300?text=Sin+Foto';
-            
-            const tarjetaHTML = `
-                <div class="tarjeta-animal" onclick="verDetalle(${animal.id})">
-                    <div class="imagen-container">
-                        <span class="etiqueta-flotante nuevo">NUEVO</span>
-                        <button class="btn-favorito" onclick="event.stopPropagation()">♥</button>
-                        <img src="${imagenUrl}" alt="${animal.titulo}" class="imagen-animal" onerror="this.src='https://placehold.co/400x300?text=Foto+No+Disponible'">
-                    </div>
-                    <div class="info-animal">
-                        <div class="precio-row">
-                            <span class="precio">${formatoMoneda(animal.precio)}</span>
-                            <span class="envio-gratis">⚡ Envío gratis</span>
-                        </div>
-                        <div class="titulo">${animal.titulo}</div>
-                        <div class="meta-data">
-                            <span class="ubicacion">📍 ${animal.ubicacion || 'Nacional'}</span>
-                            <span class="vendedor">👤 ${animal.vendedor || 'Vendedor'}</span>
-                        </div>
-                    </div>
-                </div>
-            `;
-            contenedor.innerHTML += tarjetaHTML;
-        });
-    } catch (error) { console.error("Error productos:", error); }
+function mostrarSlides(n) {
+    let slides = document.getElementsByClassName("slide");
+    let dots = document.getElementsByClassName("dot");
+    if (slides.length === 0) return;
+    if (n > slides.length) indiceSlide = 1;
+    if (n < 1) indiceSlide = slides.length;
+    for (let i = 0; i < slides.length; i++) slides[i].style.display = "none";
+    for (let i = 0; i < dots.length; i++) dots[i].className = dots[i].className.replace(" active", "");
+    slides[indiceSlide-1].style.display = "block";
+    if (dots.length > 0) dots[indiceSlide-1].className += " active";
 }
 
-// C. CARGAR BENEFICIOS (INFO CARDS)
+// ---------------------------------------------------------
+// 5. BENEFICIOS Y CATEGORÍAS VISUALES
+// ---------------------------------------------------------
 async function cargarBeneficios() {
     try {
         const contenedor = document.getElementById('contenedor-beneficios');
         if (!contenedor) return;
-
-        const respuesta = await fetch('http://localhost:3000/api/beneficios');
-        const beneficios = await respuesta.json();
-
+        const res = await fetch('http://localhost:3000/api/beneficios');
+        const data = await res.json();
         contenedor.innerHTML = '';
-
-        beneficios.forEach(item => {
-            const cardHTML = `
+        data.forEach(item => {
+            contenedor.innerHTML += `
                 <div class="info-card">
                     <div class="icono-contenedor">${item.icono_svg}</div>
                     <div class="info-texto">
                         <div class="texto-info-titulo">${item.titulo}</div>
                         <div class="texto-info-desc">${item.descripcion}</div>
                     </div>
-                </div>
-            `;
-            contenedor.innerHTML += cardHTML;
+                </div>`;
         });
-    } catch (error) { console.error("Error beneficios:", error); }
+    } catch (error) { console.error("❌ Error Beneficios:", error); }
 }
 
-// D. CARGAR DETALLE (PÁGINA DETALLE)
+async function cargarCategoriasVisuales() {
+    try {
+        const contenedor = document.getElementById('contenedor-categorias-visuales');
+        if (!contenedor) return;
+        const res = await fetch('http://localhost:3000/api/categorias');
+        const data = await res.json();
+        contenedor.innerHTML = '';
+        data.forEach(cat => {
+            const img = cat.url_imagen || 'https://placehold.co/200';
+            contenedor.innerHTML += `
+                <a href="#" class="item-cat-visual">
+                    <img src="${img}" class="circulo-img" alt="${cat.nombre}">
+                    <span class="nombre-cat">${cat.nombre}</span>
+                </a>`;
+        });
+    } catch (error) { console.error("❌ Error Cat Visuales:", error); }
+}
+
+// ---------------------------------------------------------
+// 6. HOME DINÁMICO COMPLETO (Bloques + Promos + Suscripción)
+// ---------------------------------------------------------
+async function cargarHomeDinamico() {
+    const contenedor = document.getElementById('contenedor-dinamico');
+    if (!contenedor) return;
+
+    try {
+        // Cargar todo en paralelo
+        const [resHome, resSus, resPromos] = await Promise.all([
+            fetch('http://localhost:3000/api/home-completo'),
+            fetch('http://localhost:3000/api/suscripcion'),
+            fetch('http://localhost:3000/api/promociones')
+        ]);
+
+        const secciones = await resHome.json();
+        const dataSus = await resSus.json();
+        const promociones = await resPromos.json();
+
+        // HTML Suscripción
+        let htmlSuscripcion = '';
+        if (dataSus.header) {
+            let itemsHtml = dataSus.items.map(item => `
+                <div class="item-beneficio">
+                    <div class="img-beneficio">${item.icono}</div>
+                    <p>${item.descripcion}</p>
+                </div>`).join('');
+            htmlSuscripcion = `
+                <div class="contenedor-suscripcion" style="margin: 60px auto;">
+                    <div class="banner-suscripcion">
+                        <div class="suscripcion-header">
+                            <div class="titulo-flex">
+                                <span class="badge-pro">${dataSus.header.texto_badge}</span>
+                                <h3>${dataSus.header.titulo}</h3>
+                            </div>
+                            <a href="${dataSus.header.enlace_boton}" class="btn-suscribirse">${dataSus.header.texto_boton}</a>
+                        </div>
+                        <div class="suscripcion-beneficios">${itemsHtml}</div>
+                    </div>
+                </div>`;
+        }
+
+        // HTML Promociones
+        let htmlPromociones = '';
+        if (promociones.length > 0) {
+            htmlPromociones = '<div class="contenedor-promociones">';
+            promociones.forEach(promo => {
+                htmlPromociones += `
+                    <a href="${promo.enlace_destino}" class="banner-promo">
+                        <img src="${promo.url_imagen}" class="img-promo">
+                        <div class="info-promo">
+                            <div class="titulo-promo">${promo.titulo}</div>
+                            <div class="subtitulo-promo">${promo.subtitulo}</div>
+                            <span class="btn-promo">${promo.texto_boton}</span>
+                        </div>
+                    </a>`;
+            });
+            htmlPromociones += '</div>';
+        }
+
+        contenedor.innerHTML = ''; 
+
+        secciones.forEach((seccion, index) => {
+            // INYECTAR BANNERS INTERMEDIOS
+            if (index === 1) contenedor.innerHTML += htmlPromociones;
+            if (index === 2) contenedor.innerHTML += htmlSuscripcion;
+
+            if (seccion.productos.length === 0) return;
+
+            let tarjetasHTML = '';
+            seccion.productos.forEach(animal => {
+                const img = animal.url_imagen || 'https://placehold.co/400';
+                tarjetasHTML += `
+                    <div class="tarjeta-animal" onclick="window.location.href='detalle.html?id=${animal.id}'">
+                        <div class="imagen-container">
+                            <span class="etiqueta-flotante nuevo">DISPONIBLE</span>
+                            <button class="btn-favorito" onclick="event.stopPropagation()">♥</button>
+                            <img src="${img}" class="imagen-animal">
+                        </div>
+                        <div class="info-animal">
+                            <div class="precio-row"><span class="precio">${formatoMoneda(animal.precio)}</span></div>
+                            <div class="titulo">${animal.titulo}</div>
+                            <div class="meta-data"><span class="ubicacion">📍 ${animal.ubicacion}</span></div>
+                        </div>
+                    </div>`;
+            });
+
+            contenedor.innerHTML += `
+                <div class="bloque-seccion">
+                    <h2 class="titulo-seccion">✨ ${seccion.titulo}</h2>
+                    <div class="slider-wrapper">
+                        <button class="btn-nav-productos prev-prod" onclick="scrollSeccion(this, -1)">❮</button>
+                        <div class="grilla-animales">${tarjetasHTML}</div>
+                        <button class="btn-nav-productos next-prod" onclick="scrollSeccion(this, 1)">❯</button>
+                    </div>
+                </div>`;
+        });
+
+    } catch (error) { console.error("❌ Error Home:", error); }
+}
+
+window.scrollSeccion = function(btn, dir) {
+    const wrapper = btn.parentElement;
+    const grilla = wrapper.querySelector('.grilla-animales');
+    grilla.scrollBy({ left: dir * 300, behavior: 'smooth' });
+}
+
+// ---------------------------------------------------------
+// 7. DETALLE PRODUCTO
+// ---------------------------------------------------------
 async function cargarDetalleProducto() {
     const params = new URLSearchParams(window.location.search);
     const id = params.get('id');
-
-    if (!id) {
-        window.location.href = 'index.html';
-        return;
-    }
+    if (!id) return;
 
     try {
-        const respuesta = await fetch(`http://localhost:3000/api/productos/${id}`);
-        if (!respuesta.ok) throw new Error('Producto no encontrado');
-        
-        const animal = await respuesta.json();
+        const res = await fetch(`http://localhost:3000/api/productos/${id}`);
+        if (!res.ok) throw new Error('Error');
+        const animal = await res.json();
 
-        // Llenar datos
         setText('detalle-titulo', animal.titulo);
         setText('detalle-precio', formatoMoneda(animal.precio));
-        setText('detalle-descripcion', animal.descripcion || 'Sin descripción detallada.');
+        setText('detalle-descripcion', animal.descripcion);
         setText('detalle-vendedor', animal.vendedor);
-        setText('detalle-ubicacion', animal.ubicacion || 'Ubicación no disponible');
-        setText('detalle-stock', animal.stock_disponible);
-        setText('detalle-id', animal.id);
-
-        // Imagen
-        const imagen = document.getElementById('detalle-imagen');
-        if(imagen) {
-            imagen.src = animal.url_imagen || 'https://placehold.co/600x400?text=Sin+Foto';
-            imagen.onerror = function() { this.src = 'https://placehold.co/600x400?text=Foto+No+Disponible'; };
-        }
+        setText('detalle-ubicacion', animal.ubicacion);
         
-        // WhatsApp
-        const btnWhatsapp = document.getElementById('btn-whatsapp-detalle');
-        if(btnWhatsapp) {
-            btnWhatsapp.onclick = () => {
-                const mensaje = `Hola, estoy interesado en: ${animal.titulo} (ID: ${animal.id})`;
-                const telefono = animal.telefono || '573000000000';
-                window.open(`https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`, '_blank');
-            };
-        }
+        const img = document.getElementById('detalle-imagen');
+        if(img) img.src = animal.url_imagen || 'https://placehold.co/600';
 
-    } catch (error) {
-        console.error(error);
-        document.querySelector('.contenedor-detalle').innerHTML = '<div style="padding:50px; text-align:center"><h2>Producto no encontrado 😢</h2><a href="index.html">Volver al inicio</a></div>';
-    }
+    } catch (error) { console.error("❌ Error Detalle:", error); }
 }
 
-// --- NUEVA FUNCIÓN: CARGAR MENÚ DESDE BD ---
-async function cargarCategorias() {
+// 8. FOOTER
+async function cargarFooter() {
     try {
-        const contenedor = document.getElementById('contenedor-menu');
-        if (!contenedor) return;
+        const cBusquedas = document.getElementById('footer-busquedas');
+        const cLegales = document.getElementById('footer-legales');
+        if (!cBusquedas) return;
 
-        // 1. Pedir categorías
-        const respuesta = await fetch('http://localhost:3000/api/categorias');
-        const categorias = await respuesta.json();
+        const res = await fetch('http://localhost:3000/api/footer');
+        const enlaces = await res.json();
 
-        // 2. Generar HTML (Mantenemos el botón de hamburguesa fijo al inicio si quieres)
-        // Si borraste el botón fijo del HTML, descomenta la siguiente línea:
-        // contenedor.innerHTML = `<li class="item-menu categorias-btn"><a href="#"><span class="icono-hamburguesa">☰</span> Todas</a></li>`;
-
-        // 3. Dibujar cada categoría
-        categorias.forEach(cat => {
-            const itemHTML = `
-                <li class="item-menu">
-                    <a href="#">${cat.nombre}</a>
-                </li>
-            `;
-            // Insertamos antes del botón "Ofertas" si quisieras mantener orden, 
-            // o simplemente al final de la lista.
-            contenedor.innerHTML += itemHTML;
+        cBusquedas.innerHTML = ''; cLegales.innerHTML = '';
+        enlaces.forEach(link => {
+            const html = `<a href="${link.enlace}">${link.texto}</a>`;
+            if (link.seccion === 'busquedas') cBusquedas.innerHTML += html + ' - ';
+            else cLegales.innerHTML += html;
         });
-
-        // 4. Agregar el botón de Ofertas al final (Manual)
-        contenedor.innerHTML += `<li class="item-menu destaque"><a href="#">Ofertas</a></li>`;
-
-    } catch (error) {
-        console.error("Error cargando menú:", error);
-    }
+    } catch (error) { console.error("❌ Error Footer:", error); }
 }
 
-// --- FUNCIÓN: CARGAR MENÚ Y DROPDOWN DESDE BD ---
-async function cargarCategorias() {
-    try {
-        const contenedorHorizontal = document.getElementById('contenedor-menu');
-        const contenedorDropdown = document.getElementById('dropdown-todas'); // <--- NUEVO OBJETIVO
-
-        // Si no existe ninguno de los dos, salimos
-        if (!contenedorHorizontal && !contenedorDropdown) return;
-
-        // 1. Pedir categorías al servidor
-        const respuesta = await fetch('http://localhost:3000/api/categorias');
-        const categorias = await respuesta.json();
-
-        // 2. Generar el HTML de los ítems
-        let htmlItems = '';
-        
-        categorias.forEach(cat => {
-            // Creamos el link para cada categoría
-            htmlItems += `
-                <li>
-                    <a href="#">${cat.nombre}</a>
-                </li>
-            `;
-        });
-
-        // 3. Inyectar en el Dropdown "Todas las Categorías"
-        if (contenedorDropdown) {
-            contenedorDropdown.innerHTML = htmlItems;
-        }
-
-        // 4. Inyectar en la Barra Horizontal (Opcional: podrías querer mostrar solo algunas aquí)
-        if (contenedorHorizontal) {
-            // Mantenemos el botón de "Todas" al principio y "Ofertas" al final
-            const botonTodas = `<li class="item-menu categorias-btn">
-                                    <a href="#"><span class="icono-hamburguesa">☰</span> Todas las Categorías</a>
-                                    <ul class="submenu" id="dropdown-todas">${htmlItems}</ul>
-                                </li>`;
-            
-            // Aquí decidimos poner las categorías también en la barra horizontal
-            // Nota: Si son muchas, quizás prefieras no ponerlas todas en la barra horizontal
-            let itemsHorizontales = '';
-            categorias.forEach(cat => {
-                itemsHorizontales += `<li class="item-menu"><a href="#">${cat.nombre}</a></li>`;
-            });
-
-            const botonOfertas = `<li class="item-menu destaque"><a href="#">Ofertas</a></li>`;
-
-            // Reconstruimos todo el menú
-            contenedorHorizontal.innerHTML = botonTodas + itemsHorizontales + botonOfertas;
-        }
-
-    } catch (error) {
-        console.error("Error cargando categorías:", error);
-    }
-}
-
-// --- NUEVA FUNCIÓN: CARGAR LOGO Y NOMBRE ---
-async function cargarConfiguracion() {
-    try {
-        const iconoContainer = document.getElementById('logo-icono-db');
-        const textoContainer = document.getElementById('logo-texto-db');
-        
-        if (!iconoContainer || !textoContainer) return;
-
-        // 1. Pedir datos
-        const respuesta = await fetch('http://localhost:3000/api/configuracion');
-        const config = await respuesta.json();
-
-        if (!config) return;
-
-        // 2. Inyectar Icono SVG
-        iconoContainer.innerHTML = config.logo_svg;
-
-        // 3. Inyectar Nombre con Estilo
-        // Dividimos el nombre para darle color diferente a la segunda mitad (Merca - Agro)
-        // O simplemente lo ponemos todo junto si prefieres.
-        // Aquí aplicamos la lógica: "Merca" blanco, "Agro" amarillo.
-        
-        const nombre = config.nombre_sitio;
-        const mitad = Math.ceil(nombre.length / 2);
-        const primeraParte = nombre.slice(0, mitad); // Ej: "Merca"
-        const segundaParte = nombre.slice(mitad);    // Ej: "Agro"
-
-        textoContainer.innerHTML = `${primeraParte}<span class="agro-destacado">${segundaParte}</span>`;
-        
-        // Opcional: Cambiar el título de la pestaña del navegador
-        document.title = `${config.nombre_sitio} - Tu tienda de campo`;
-
-    } catch (error) {
-        console.error("Error cargando configuración:", error);
-    }
-}
-
-// --- NUEVA FUNCIÓN: CARGAR MENÚ DE USUARIO ---
-async function cargarMenuUsuario() {
-    try {
-        const contenedor = document.getElementById('contenedor-usuario');
-        if (!contenedor) return;
-
-        // 1. Pedir datos
-        const respuesta = await fetch('http://localhost:3000/api/menu-usuario');
-        const botones = await respuesta.json();
-
-        // 2. Limpiar
-        contenedor.innerHTML = '';
-
-        // 3. Dibujar botones
-        botones.forEach(boton => {
-            const btnHTML = `
-                <a href="${boton.enlace}" class="btn-accion">
-                    <div class="icono-accion">
-                        ${boton.icono_svg}
-                    </div>
-                    <span>${boton.texto}</span>
-                </a>
-            `;
-            contenedor.innerHTML += btnHTML;
-        });
-
-    } catch (error) {
-        console.error("Error cargando menú usuario:", error);
-    }
-}
-
-// =========================================================
-// 4. UTILIDADES
-// =========================================================
-
+// UTILIDADES
 function formatoMoneda(valor) {
-    return new Intl.NumberFormat('es-CO', {
-        style: 'currency', currency: 'COP', minimumFractionDigits: 0
-    }).format(valor);
+    return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(valor);
 }
-
-function verDetalle(id) {
-    window.location.href = `detalle.html?id=${id}`;
-}
-
-function setText(id, texto) {
-    const el = document.getElementById(id);
-    if (el) el.textContent = texto;
-}
+function setText(id, text) { const el = document.getElementById(id); if(el) el.textContent = text; }
